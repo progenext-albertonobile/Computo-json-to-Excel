@@ -47,3 +47,11 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# pycache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
