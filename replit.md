@@ -16,7 +16,20 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
-## Key Commands
+## Computo XLSX Generator (Main App)
+
+A Python FastAPI web app for generating branded Excel files from JSON bundles.
+
+- **Location**: `playbook_industrial/`
+- **Entry point**: `playbook_industrial/main.py`
+- **Engine modules**: `genera_computo.py`, `validate_bundle.py` (do not modify)
+- **Default template**: `playbook_industrial/templates/Computo preliminare-V3.xlsx`
+- **Frontend**: `playbook_industrial/static/index.html` (single-page, vanilla JS)
+- **Run**: `cd playbook_industrial && python main.py`
+- **Port**: `PORT` env var (default 8000)
+- **Dependencies**: `playbook_industrial/requirements.txt`
+
+## Key Commands (monorepo)
 
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
