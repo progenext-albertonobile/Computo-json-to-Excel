@@ -120,7 +120,7 @@ def _find_item_rows_in_section(ws, section_row: int, section_end: int, prefer_lu
         a_val = ws[f"A{row}"].value
         if d_val is None or not str(a_val or "").strip():
             continue
-        if str(a_val).lstrip().startswith("  "):
+        if str(a_val or "").startswith("  "):
             continue
         if prefer_lumpsum:
             r_val = ws[f"R{row}"].value
@@ -170,7 +170,7 @@ def _clear_item_row(ws, row: int) -> None:
     for col in INPUT_COLS_TEXT:
         ws[f"{col}{row}"] = ""
     for col in INPUT_COLS_NUM:
-        ws[f"{col}{row}"] = 0
+        ws[f"{col}{row}"] = None
 
 
 def _write_item(ws, row: int, item: dict, force_total: bool = False) -> None:
