@@ -1,0 +1,518 @@
+{
+  "metadata": {
+    "cliente": "ROSSI LOGISTICA S.r.l.",
+    "indirizzo": "Via della Meccanica 12, Bentivoglio (BO)",
+    "data": "Aprile 2026",
+    "titolo": "RIQUALIFICAZIONE CENTRALE TERMICA — Sostituzione caldaie a gas con PDC + FV 20 kWp",
+    "note_header": "Prezzi al cliente finale — IVA esclusa | Preventivo nr. 2026-041"
+  },
+  "rows": [
+    {
+      "type": "sezione",
+      "label": "CAPITOLO 1 — DEMOLIZIONI E SMALTIMENTI"
+    },
+    {
+      "type": "sottosezione",
+      "label": "SMANTELLAMENTO IMPIANTO TERMICO ESISTENTE",
+      "bg": "FFFADBD8"
+    },
+    {
+      "type": "voce_demolizione",
+      "desc": "Smontaggio caldaia Baltur TRENOx 200 — caldaia processo",
+      "brand": "Baltur",
+      "specs": "Smontaggio meccanico completo, disconnessione idraulica e gas, rottamazione RAEE. Tappatura linea gas a monte.",
+      "qty": 1,
+      "pu": 2800,
+      "sc": 0,
+      "op_acc": 0.05,
+      "inst": 0.55,
+      "ric": 0.22,
+      "impr": 0.1,
+      "note": "〰️ stima a corpo"
+    },
+    {
+      "type": "voce_demolizione",
+      "desc": "Smontaggio caldaia Baltur Smile Energy MK 160 — caldaia riscaldamento",
+      "brand": "Baltur",
+      "specs": "Smontaggio meccanico completo, disconnessione idraulica e gas, rottamazione RAEE.",
+      "qty": 1,
+      "pu": 2200,
+      "sc": 0,
+      "op_acc": 0.05,
+      "inst": 0.55,
+      "ric": 0.22,
+      "impr": 0.1,
+      "note": "〰️ stima a corpo"
+    },
+    {
+      "type": "voce_demolizione",
+      "desc": "Smontaggio piping, valvole e coibentazioni centrale termica",
+      "brand": "",
+      "specs": "Tubazioni Fe DN32÷DN80, valvole di intercettazione, vasi espansione, coibentazioni elastomero/PVC. Smaltimento differenziato.",
+      "qty": 1,
+      "pu": 1800,
+      "sc": 0,
+      "op_acc": 0.05,
+      "inst": 0.55,
+      "ric": 0.22,
+      "impr": 0.1,
+      "note": "〰️ stima a corpo — lunghezza definitiva da rilievo"
+    },
+    {
+      "type": "voce_demolizione",
+      "desc": "Smontaggio canne fumarie esistenti (n.2)",
+      "brand": "",
+      "specs": "Rimozione camini in acciaio inox DN200 h~8m cadauno, smaltimento.",
+      "qty": 2,
+      "pu": 780,
+      "sc": 0,
+      "op_acc": 0.05,
+      "inst": 0.45,
+      "ric": 0.22,
+      "impr": 0.1,
+      "note": "〰️ stima — verificare accesso copertura"
+    },
+    {
+      "type": "voce_trasporto",
+      "desc": "Trasporto e smaltimento materiali da demolizione",
+      "brand": "",
+      "specs": "Conferimento centro raccolta autorizzato RAEE + ferroso.",
+      "qty": 1,
+      "pu": 380,
+      "ric": 0.1,
+      "impr": 0,
+      "note": "〰️ stima — dipende da peso effettivo"
+    },
+    {
+      "type": "sottotot_sezione",
+      "label": "CAPITOLO 1"
+    },
+    {
+      "type": "sezione",
+      "label": "CAPITOLO 2 — POMPA DI CALORE — CIRCUITO PROCESSO"
+    },
+    {
+      "type": "sottosezione",
+      "label": "FORNITURA PDC PROCESSO"
+    },
+    {
+      "type": "voce_highlight",
+      "desc": "PDC aria-acqua ad alta temperatura — circuito processo",
+      "brand": "Mitsubishi Zubadan / RHOSS THAITI HT",
+      "specs": "Potenza termica 45 kW a B0/W60°C, R32 DC inverter, uscita max 65°C, SCOP 2,8. Adatta ad applicazioni di sterilizzazione fino a 60°C.",
+      "qty": 1,
+      "pu": 14500,
+      "sc": 0,
+      "op_acc": 0.02,
+      "inst": 0.05,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "⚠️ prezzo da confermare — temperatura mandata 65°C: verificare SCOP reale"
+    },
+    {
+      "type": "voce",
+      "desc": "Serbatoio di accumulo processo — 500 L",
+      "brand": "Cordivari / Reflex",
+      "specs": "Accumulo inerziale 500L, T.max 90°C, coibentazione 80mm, attacchi 1½\" superiori/inferiori.",
+      "qty": 1,
+      "pu": 1850,
+      "sc": 0,
+      "op_acc": 0.04,
+      "inst": 0.18,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "〰️ stima"
+    },
+    {
+      "type": "voce",
+      "desc": "Resistenza elettrica integrativa 9 kW — picchi e avviamento",
+      "brand": "",
+      "specs": "Resistenza flangiata DN50, 9 kW trifase 400V, termostato di sicurezza. Integrazione <5% energia annua stimata.",
+      "qty": 1,
+      "pu": 480,
+      "sc": 0,
+      "op_acc": 0.05,
+      "inst": 0.2,
+      "ric": 0.25,
+      "impr": 0.1,
+      "note": "〰️ stima — attiva solo sotto −5°C"
+    },
+    {
+      "type": "sottosezione",
+      "label": "IMPIANTO IDRAULICO — CIRCUITO PROCESSO"
+    },
+    {
+      "type": "voce",
+      "desc": "Rifacimento piping primario C.T. — circuito processo",
+      "brand": "Tubo nero EN 10255 ser. M",
+      "specs": "DN40÷DN65, raccorderia, staffaggi, collaudo 6 bar. ~20 m lineari stimati.",
+      "qty": 1,
+      "pu": 2200,
+      "sc": 0,
+      "op_acc": 0.08,
+      "inst": 0.42,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "〰️ stima — quantità da rilievo esecutivo"
+    },
+    {
+      "type": "voce",
+      "desc": "Coibentazione tubazioni primario processo",
+      "brand": "Armaflex HT / K-Flex ST",
+      "specs": "Guaina elastomerica alta temperatura, sp. 32mm per DN50+, 25mm per DN≤40.",
+      "qty": 1,
+      "pu": 680,
+      "sc": 0,
+      "op_acc": 0.06,
+      "inst": 0.38,
+      "ric": 0.25,
+      "impr": 0.1,
+      "note": "〰️ stima"
+    },
+    {
+      "type": "voce",
+      "desc": "Circolatore EC primario — circuito processo DN50",
+      "brand": "Grundfos MAGNA3 / Wilo Stratos MAXO",
+      "specs": "EC velocità variabile, DN50, Pmax 370 W, Classe A. Sostituzione TOP-SD 50/10 esistente.",
+      "qty": 1,
+      "pu": 820,
+      "sc": 0,
+      "op_acc": 0.05,
+      "inst": 0.18,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "〰️ stima"
+    },
+    {
+      "type": "voce",
+      "desc": "Valvolame, sicurezze e accessori — circuito processo",
+      "brand": "",
+      "specs": "Rubinetti DN40 A/R, ritegno, filtro Y, vaso espansione 24L, VS 3 bar, manometro, sfiati.",
+      "qty": 1,
+      "pu": 950,
+      "sc": 0,
+      "op_acc": 0.06,
+      "inst": 0.25,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "〰️ stima a corpo"
+    },
+    {
+      "type": "voce_trasporto",
+      "desc": "Trasporto materiali — circuito processo",
+      "brand": "",
+      "specs": "",
+      "qty": 1,
+      "pu": 320,
+      "ric": 0.1,
+      "impr": 0,
+      "note": "〰️ stima proporzionale"
+    },
+    {
+      "type": "sottotot_sezione",
+      "label": "CAPITOLO 2"
+    },
+    {
+      "type": "sezione",
+      "label": "CAPITOLO 3 — POMPA DI CALORE — RISCALDAMENTO CAPANNONE"
+    },
+    {
+      "type": "sottosezione",
+      "label": "FORNITURA PDC RISCALDAMENTO"
+    },
+    {
+      "type": "voce_highlight",
+      "desc": "PDC aria-acqua riscaldamento capannone — coppia M/S",
+      "brand": "RHOSS THAITI 122 P0 ElectaMAXI-ECO",
+      "specs": "N.2 unità monoblocco R32 DC inverter, Pdesign 29 kW/cad., SCOP 4,53 a 35°C. Configurazione master/slave, circolatore EC integrato.",
+      "qty": 2,
+      "pu": 8500,
+      "sc": 0,
+      "op_acc": 0.02,
+      "inst": 0.04,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "⚠️ prezzo interpolato — confermare con offerta formale RHOSS"
+    },
+    {
+      "type": "voce",
+      "desc": "Serbatoio inerziale / disgiuntore idraulico KAI-110",
+      "brand": "RHOSS",
+      "specs": "110 L, disgiuntore primario/secondario. Necessario con 2 PDC inverter + zone radianti.",
+      "qty": 1,
+      "pu": 720,
+      "sc": 0,
+      "op_acc": 0.05,
+      "inst": 0.15,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "〰️ SCELTA PROGETTUALE: evita cycling con zone a portata variabile"
+    },
+    {
+      "type": "voce",
+      "desc": "Primo avviamento PDC riscaldamento — garanzia 24 mesi",
+      "brand": "Tecnico autorizzato RHOSS",
+      "specs": "Verifica parametri, taratura curva climatica, registrazione garanzia.",
+      "qty": 2,
+      "pu": 231.6,
+      "ric": 0.15,
+      "impr": 0,
+      "note": "✅ da offerta formale RHOSS"
+    },
+    {
+      "type": "sottosezione",
+      "label": "IMPIANTO IDRAULICO — RISCALDAMENTO CAPANNONE"
+    },
+    {
+      "type": "voce",
+      "desc": "Rifacimento piping primario C.T. — circuito riscaldamento",
+      "brand": "Tubo nero EN 10255 ser. M",
+      "specs": "DN40÷DN65, raccorderia, staffaggi, collaudo 6 bar. ~25 m lineari stimati.",
+      "qty": 1,
+      "pu": 2600,
+      "sc": 0,
+      "op_acc": 0.08,
+      "inst": 0.42,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "〰️ stima — quantità da rilievo esecutivo"
+    },
+    {
+      "type": "voce",
+      "desc": "Coibentazione tubazioni primario riscaldamento",
+      "brand": "Armaflex / K-Flex",
+      "specs": "Guaina elastomerica sp. 25mm per DN50+, 19mm per DN≤40.",
+      "qty": 1,
+      "pu": 750,
+      "sc": 0,
+      "op_acc": 0.06,
+      "inst": 0.38,
+      "ric": 0.25,
+      "impr": 0.1,
+      "note": "〰️ stima"
+    },
+    {
+      "type": "voce",
+      "desc": "Circolatore EC principale distribuzione capannone DN50",
+      "brand": "Grundfos MAGNA3 / Wilo Stratos MAXO",
+      "specs": "EC velocità variabile, DN50, Pmax 340 W, Classe A.",
+      "qty": 1,
+      "pu": 750,
+      "sc": 0,
+      "op_acc": 0.05,
+      "inst": 0.18,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "〰️ stima"
+    },
+    {
+      "type": "voce",
+      "desc": "Valvolame, sicurezze e accessori — circuito riscaldamento",
+      "brand": "",
+      "specs": "Rubinetti DN40 A/R per ogni PDC, ritegno, filtro Y, vaso espansione 35L, VS 3 bar, manometro, sfiati.",
+      "qty": 1,
+      "pu": 1100,
+      "sc": 0,
+      "op_acc": 0.06,
+      "inst": 0.25,
+      "ric": 0.28,
+      "impr": 0.1,
+      "note": "〰️ stima a corpo"
+    },
+    {
+      "type": "voce_trasporto",
+      "desc": "Trasporto materiali — circuito riscaldamento + PDC",
+      "brand": "RHOSS + fornitori vari",
+      "specs": "",
+      "qty": 1,
+      "pu": 480,
+      "ric": 0.1,
+      "impr": 0,
+      "note": "〰️ stima composita"
+    },
+    {
+      "type": "sottotot_sezione",
+      "label": "CAPITOLO 3"
+    },
+    {
+      "type": "sezione",
+      "label": "CAPITOLO 4 — FOTOVOLTAICO 20 kWp"
+    },
+    {
+      "type": "sottosezione",
+      "label": "FORNITURA E INSTALLAZIONE FV"
+    },
+    {
+      "type": "voce_highlight",
+      "desc": "Pannelli FV 410 Wp monocristallino N-type — n.49 pz.",
+      "brand": "JA Solar / Longi Hi-MO",
+      "specs": "N-type TOPCon monofacciale, η≥22%, Pmax 410 Wp, 49 × 410 = 20,09 kWp. Garanzia 12a prodotto / 25a potenza.",
+      "qty": 49,
+      "pu": 90,
+      "sc": 0,
+      "op_acc": 0.02,
+      "inst": 0.2,
+      "ric": 0.22,
+      "impr": 0.1,
+      "note": "〰️ stima — mercato IT 2026 N-type mono: 0,18÷0,22 €/Wp"
+    },
+    {
+      "type": "voce",
+      "desc": "Inverter trifase grid-tie 20 kW",
+      "brand": "SMA Sunny Tripower / Fronius Symo",
+      "specs": "400V 3+N+PE, 2 MPPT, efficienza >98%, conforme CEI 0-21. Predisposizione storage AC.",
+      "qty": 1,
+      "pu": 2800,
+      "sc": 0,
+      "op_acc": 0.02,
+      "inst": 0.07,
+      "ric": 0.25,
+      "impr": 0.1,
+      "note": "〰️ stima 2026"
+    },
+    {
+      "type": "voce",
+      "desc": "Struttura ballast tetto piano 20°, n.49 pannelli",
+      "brand": "Schletter / K2",
+      "specs": "Profili alluminio anodizzato, zavorra cls prefabbricata, no foratura. Certificata EN 1991-1-4.",
+      "qty": 1,
+      "pu": 1200,
+      "sc": 0,
+      "op_acc": 0.04,
+      "inst": 0.22,
+      "ric": 0.22,
+      "impr": 0.1,
+      "note": "〰️ stima — verifica strutturale copertura necessaria"
+    },
+    {
+      "type": "voce",
+      "desc": "Cablaggio DC + AC + protezioni + messa a terra",
+      "brand": "",
+      "specs": "Cavi DC 4mm² 1.800V, connettori MC4, box stringa IP65, fusibili, FG7OR AC, SPD Classe II DC+AC, anello equipotenziale.",
+      "qty": 1,
+      "pu": 1450,
+      "sc": 0,
+      "op_acc": 0.07,
+      "inst": 0.28,
+      "ric": 0.22,
+      "impr": 0.1,
+      "note": "〰️ stima comprensiva"
+    },
+    {
+      "type": "voce",
+      "desc": "Quadro AC protezioni FV + contatore bidirezionale",
+      "brand": "Hager / Legrand",
+      "specs": "MCCB AC, SPD Classe II, sezionatore, IP65. Contatore bidirezionale produzione+scambio per pratiche GSE/RID.",
+      "qty": 1,
+      "pu": 780,
+      "sc": 0,
+      "op_acc": 0.07,
+      "inst": 0.28,
+      "ric": 0.22,
+      "impr": 0.1,
+      "note": "〰️ stima — verificare requisiti E-Distribuzione"
+    },
+    {
+      "type": "voce_trasporto",
+      "desc": "Trasporto materiali FV",
+      "brand": "",
+      "specs": "Pannelli, inverter, struttura, materiale elettrico.",
+      "qty": 1,
+      "pu": 280,
+      "ric": 0.1,
+      "impr": 0,
+      "note": "〰️ stima"
+    },
+    {
+      "type": "sottotot_sezione",
+      "label": "CAPITOLO 4"
+    },
+    {
+      "type": "sezione",
+      "label": "CAPITOLO 5 — SERVIZI DI INGEGNERIA E INCENTIVI"
+    },
+    {
+      "type": "sottosezione",
+      "label": "PROGETTAZIONE E DIREZIONE LAVORI"
+    },
+    {
+      "type": "voce_lumpsum",
+      "desc": "Progettazione esecutiva meccanica — PDC processo + riscaldamento",
+      "brand": "Progenext",
+      "specs": "Progetto esecutivo impianti meccanici, schema P&ID, relazione tecnica, direzione lavori, collaudo.",
+      "qty": 1,
+      "total": 5800,
+      "note": "〰️ stima a corpo"
+    },
+    {
+      "type": "voce_lumpsum",
+      "desc": "Progettazione esecutiva FV + DL + pratiche GSE/RID",
+      "brand": "Progenext",
+      "specs": "Progetto esecutivo FV, direzione lavori, collaudo, comunicazione GSE, attivazione RID.",
+      "qty": 1,
+      "total": 3900,
+      "note": "〰️ stima a corpo"
+    },
+    {
+      "type": "sottosezione",
+      "label": "PRATICHE INCENTIVANTI"
+    },
+    {
+      "type": "voce_lumpsum",
+      "desc": "Gestione Conto Termico 3.0 — PDC + FV",
+      "brand": "Progenext",
+      "specs": "Richiesta preliminare GSE, pratica Portaltermico, supporto post-erogazione.",
+      "qty": 1,
+      "total": 2800,
+      "note": "〰️ stima — incentivo CT3.0 stimato ~18.000÷22.000 € su 5 anni"
+    },
+    {
+      "type": "voce_lumpsum",
+      "desc": "Pratica INAIL — apparecchiature in pressione (vasi espansione + accumuli)",
+      "brand": "Progenext / Studio tecnico abilitato",
+      "specs": "Denuncia e omologazione apparecchi a pressione INAIL ex ISPESL.",
+      "qty": 1,
+      "total": 1200,
+      "note": "〰️ stima — obbligatoria per VS e serbatoi >25L"
+    },
+    {
+      "type": "sottotot_sezione",
+      "label": "CAPITOLO 5"
+    },
+    {
+      "type": "totale"
+    },
+    {
+      "type": "esclusioni",
+      "label": "ESCLUSIONI — VOCI NON INCLUSE NEL COMPUTO"
+    },
+    {
+      "type": "voce_esterna",
+      "desc": "Connessione E-Distribuzione BT trifase — adeguamento POD",
+      "brand": "E-DISTRIBUZIONE S.p.A.",
+      "specs": "Preventivo connessione, eventuale adeguamento SPI se >11,08 kW, iter 60-90 giorni. IMPORTO DA PREVENTIVO FORMALE.",
+      "qty": 1,
+      "pu": 3500,
+      "sc": 0,
+      "op_acc": 0,
+      "inst": 0,
+      "ric": 0,
+      "impr": 0,
+      "note": "⚠️ AZIONE IMMEDIATA — vincola data entrata in esercizio FV"
+    },
+    {
+      "type": "voce_esterna",
+      "desc": "Opere murarie e fori passaggi tubazioni/cavi",
+      "brand": "Impresa muraria esterna",
+      "specs": "Forature pareti, sigillature, eventuali platee o ancoraggi. Importo a preventivo muratore.",
+      "qty": 1,
+      "pu": 1800,
+      "sc": 0,
+      "op_acc": 0,
+      "inst": 0,
+      "ric": 0,
+      "impr": 0,
+      "note": "〰️ stima orientativa — fuori computo"
+    }
+  ]
+}
