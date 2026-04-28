@@ -16,7 +16,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from genera_computo import build
+from genera_computo import build, build_sintesi
 
 MAX_JSON_BYTES = 5 * 1024 * 1024  # 5 MB
 
@@ -60,6 +60,41 @@ async def generate(json_file: UploadFile = File(...)):
     cliente = (payload.get("metadata", {}) or {}).get("cliente", "computo")
     safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in cliente)
     filename = f"COMPUTO_{safe}.xlsx"
+
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.post("/generate/sintesi")
+async def generate_sintesi(json_file: UploadFile = File(...)):
+    _check_json(json_file)
+
+    raw_json = await json_file.read()
+    if len(raw_json) > MAX_JSON_BYTES:
+        raise HTTPException(413, "JSON file too large (max 5 MB)")
+
+    try:
+        payload = json.loads(raw_json.decode("utf-8"))
+    except Exception as exc:
+        raise HTTPException(400, f"Invalid JSON: {exc}") from exc
+
+    if not isinstance(payload, dict) or "rows" not in payload:
+        raise HTTPException(422, "JSON must be an object with a 'rows' array")
+
+    try:
+        wb = build_sintesi(payload)
+        buf = BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+    except Exception as exc:
+        raise HTTPException(500, f"Generation error: {exc}") from exc
+
+    cliente = (payload.get("metadata", {}) or {}).get("cliente", "stima")
+    safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in cliente)
+    filename = f"STIMA_{safe}.xlsx"
 
     return StreamingResponse(
         buf,

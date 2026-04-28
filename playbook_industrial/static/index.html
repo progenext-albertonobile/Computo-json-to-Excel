@@ -155,9 +155,16 @@
     </div>
   </div>
 
-  <button class="btn btn-primary" id="generateBtn" onclick="runGenerate()" style="margin-top:1rem">
-    Genera XLSX
-  </button>
+  <div style="display:flex; gap:.75rem; margin-top:1rem;">
+    <button class="btn btn-primary" id="generateBtn" style="flex:1"
+            onclick="runGenerate('/generate','COMPUTO')">
+      Genera Computo esteso
+    </button>
+    <button class="btn" id="generateSintBtn" style="flex:1; background:#0f766e; color:#fff;"
+            onclick="runGenerate('/generate/sintesi','STIMA')">
+      Genera Stima cliente
+    </button>
+  </div>
 
   <div class="status" id="statusBox"></div>
 
@@ -235,27 +242,33 @@
     $('statusBox').className = 'status';
   }
 
-  function setLoading(on) {
-    const btn = $('generateBtn');
-    btn.disabled = on;
-    btn.innerHTML = on
-      ? '<span class="spinner"></span> Generazione…'
-      : 'Genera XLSX';
+  function setLoading(on, prefix = 'COMPUTO') {
+    const btn1 = $('generateBtn');
+    const btn2 = $('generateSintBtn');
+    btn1.disabled = on;
+    btn2.disabled = on;
+    if (on) {
+      const target = prefix === 'STIMA' ? btn2 : btn1;
+      target.innerHTML = '<span class="spinner"></span> Generazione…';
+    } else {
+      btn1.innerHTML = 'Genera Computo esteso';
+      btn2.innerHTML = 'Genera Stima cliente';
+    }
   }
 
-  async function runGenerate() {
+  async function runGenerate(endpoint = '/generate', prefix = 'COMPUTO') {
     const jsonFile = $('jsonInput').files[0];
     if (!jsonFile) { showStatus('Seleziona prima un file JSON.', 'info'); return; }
 
     $('downloadArea').innerHTML = '';
-    setLoading(true);
+    setLoading(true, prefix);
     showStatus('Generazione in corso…', 'info');
 
     const fd = new FormData();
     fd.append('json_file', jsonFile);
 
     try {
-      const res = await fetch('/generate', { method: 'POST', body: fd });
+      const res = await fetch(endpoint, { method: 'POST', body: fd });
       if (!res.ok) {
         const body = await res.json().catch(() => ({ detail: res.statusText }));
         showStatus('Errore: ' + (body.detail || res.statusText), 'error');
@@ -266,7 +279,7 @@
       const blob = await res.blob();
       const disp = res.headers.get('Content-Disposition') || '';
       const match = disp.match(/filename="([^"]+)"/);
-      const fname = match ? match[1] : 'COMPUTO_OUTPUT.xlsx';
+      const fname = match ? match[1] : `${prefix}_OUTPUT.xlsx`;
 
       const url = URL.createObjectURL(blob);
       $('downloadArea').innerHTML = `
@@ -274,7 +287,7 @@
           Scarica ${fname}
         </a>`;
 
-      showStatus('XLSX generato con successo.', 'success');
+      showStatus(`${prefix} generato con successo.`, 'success');
     } catch (e) {
       showStatus('Errore di rete: ' + e.message, 'error');
     }

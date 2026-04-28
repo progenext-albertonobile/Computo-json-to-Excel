@@ -398,6 +398,190 @@ def build(data):
 
     return wb
 
+# ── SINTESI (output cliente) ───────────────────────────────────────────────
+# 6 colonne: A=desc  B=marca  C=specs  D=qty  E=prezzo_cliente  F=note
+# I coefficienti analitici vengono usati per calcolare il prezzo ma
+# NON compaiono nel file — proprietà intellettuale Progenext.
+
+SINT_COLS = {1: 42, 2: 18, 3: 52, 4: 5, 5: 14, 6: 42}
+SINT_NCOLS = 6
+
+def _sint_fill_row(ws, r, bg, fc, bold=True, sz=8):
+    for c in range(1, SINT_NCOLS + 1):
+        style(ws.cell(r, c), bg, fc, bold, sz)
+
+def _calc_prezzo(row):
+    """Calcola prezzo cliente dalla catena analitica — mai esposto nel file."""
+    qty  = row.get('qty', 1)
+    pu   = row.get('pu', 0)
+    sc   = row.get('sc', 0)
+    oa   = row.get('op_acc', 0)
+    inst = row.get('inst', 0)
+    ric  = row.get('ric', 0)
+    impr = row.get('impr', 0)
+    F = qty * pu
+    H = F * (1 - sc)
+    J = H * oa
+    L = (H + J) * inst
+    N = (H + J + L) * ric
+    O = H + J + L + N
+    return round(O * (1 + impr), 2)
+
+def _sint_header(ws, meta):
+    ws.row_dimensions[1].height = 22
+    _sint_fill_row(ws, 1, C['navy'], C['fwhite'], sz=10)
+    ws.merge_cells('A1:F1')
+    style(ws.cell(1, 1,
+          f'  STIMA PRELIMINARE — {meta.get("cliente","")}  |  {meta.get("indirizzo","")}'),
+          C['navy'], C['fwhite'], sz=10)
+
+    ws.row_dimensions[2].height = 20
+    _sint_fill_row(ws, 2, C['blue'], C['fwhite'], sz=10)
+    ws.merge_cells('A2:D2')
+    style(ws.cell(2, 1, f'  {meta.get("titolo","")}'),
+          C['blue'], C['fwhite'], sz=10)
+    ws.merge_cells('E2:F2')
+    style(ws.cell(2, 5, meta.get('note_header', '')),
+          C['blue'], C['fwhite'], sz=7, h='center')
+
+    ws.row_dimensions[3].height = 22
+    hdrs = ['Articolo / Descrizione', 'Marca / Rif.',
+            'Specifiche tecniche e note', 'q.ta',
+            'PREZZO\nCLIENTE €', 'Nota / Affidabilità']
+    for i, h in enumerate(hdrs, 1):
+        c = ws.cell(3, i, h)
+        style(c, C['lbhdr'], C['fwhite'], sz=8, h='center')
+
+def build_sintesi(data):
+    """Output cliente: 6 colonne, prezzi calcolati, catena analitica nascosta."""
+    meta = data.get('metadata', {})
+    rows = data.get('rows', [])
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'STIMA'
+    ws.sheet_view.showGridLines = False
+    ws.freeze_panes = 'A4'
+
+    for col, w in SINT_COLS.items():
+        ws.column_dimensions[get_column_letter(col)].width = w
+
+    _sint_header(ws, meta)
+
+    cur = 4
+    alt = 0
+    subtot_rows = []
+    sec_start = 4
+    totale_row = None
+
+    VOCE_TYPES = {'voce', 'voce_highlight', 'voce_demolizione',
+                  'voce_esterna', 'voce_trasporto'}
+
+    for row_data in rows:
+        t = row_data.get('type', '')
+
+        if t == 'sezione':
+            ws.row_dimensions[cur].height = 14
+            _sint_fill_row(ws, cur, C['navy'], C['fwhite'], sz=9)
+            ws.merge_cells(f'A{cur}:F{cur}')
+            style(ws.cell(cur, 1, f'  ━━━━━━  {row_data.get("label","")}  ━━━━━━'),
+                  C['navy'], C['fwhite'], sz=9)
+            sec_start = cur + 1
+            alt = 0
+
+        elif t == 'sottosezione':
+            ws.row_dimensions[cur].height = 12
+            bg = row_data.get('bg') or C['lbbg']
+            _sint_fill_row(ws, cur, bg, C['fnavy'], sz=8)
+            ws.merge_cells(f'A{cur}:F{cur}')
+            style(ws.cell(cur, 1, f'  {row_data.get("label","")}'),
+                  bg, C['fnavy'], sz=8)
+
+        elif t in VOCE_TYPES:
+            bg_map = {
+                'voce_highlight':   C['green'],
+                'voce_demolizione': C['pink'],
+                'voce_esterna':     C['orange'],
+            }
+            bg = bg_map.get(t, C['white'] if alt % 2 == 0 else C['gray'])
+            ws.row_dimensions[cur].height = 32
+            prezzo = _calc_prezzo(row_data)
+            vals = {
+                1: row_data.get('desc', ''),
+                2: row_data.get('brand', ''),
+                3: row_data.get('specs', ''),
+                4: row_data.get('qty', 1),
+                5: prezzo,
+                6: row_data.get('note', ''),
+            }
+            for col, val in vals.items():
+                cell = ws.cell(cur, col, val)
+                style(cell, bg, C['black'], bold=False, sz=8,
+                      h='left' if col in {1, 2, 3, 6} else 'right')
+                if col == 5:
+                    cell.number_format = EUR
+            alt += 1
+
+        elif t == 'voce_lumpsum':
+            bg = C['white'] if alt % 2 == 0 else C['gray']
+            ws.row_dimensions[cur].height = 24
+            prezzo = row_data.get('total', 0)
+            vals = {1: row_data.get('desc', ''), 2: row_data.get('brand', ''),
+                    3: row_data.get('specs', ''), 4: row_data.get('qty', 1),
+                    5: prezzo, 6: row_data.get('note', '')}
+            for col, val in vals.items():
+                cell = ws.cell(cur, col, val)
+                style(cell, bg, C['black'], bold=False, sz=8,
+                      h='left' if col in {1, 2, 3, 6} else 'right')
+                if col == 5:
+                    cell.number_format = EUR
+            alt += 1
+
+        elif t == 'sottotot_sezione':
+            ws.row_dimensions[cur].height = 16
+            _sint_fill_row(ws, cur, C['blue'], C['fwhite'], sz=9)
+            ws.merge_cells(f'A{cur}:D{cur}')
+            style(ws.cell(cur, 1,
+                  f'  SUBTOTALE {row_data.get("label","")} — IVA esclusa'),
+                  C['blue'], C['fwhite'], sz=9)
+            c = ws.cell(cur, 5, f'=SUM(E{sec_start}:E{cur-1})')
+            style(c, C['blue'], C['fwhite'], sz=11, h='right')
+            c.number_format = EUR
+            style(ws.cell(cur, 6, ''), C['blue'], C['fwhite'])
+            subtot_rows.append(cur)
+            sec_start = cur + 1
+
+        elif t == 'totale':
+            ws.row_dimensions[cur].height = 18
+            _sint_fill_row(ws, cur, C['navy'], C['fwhite'], sz=10)
+            ws.merge_cells(f'A{cur}:D{cur}')
+            style(ws.cell(cur, 1, '  TOTALE LAVORI — IVA esclusa'),
+                  C['navy'], C['fwhite'], sz=10)
+            formula = '=SUM(' + ','.join(f'E{sr}' for sr in subtot_rows) + ')'
+            c = ws.cell(cur, 5, formula)
+            style(c, C['navy'], C['fwhite'], sz=12, h='right')
+            c.number_format = EUR
+            style(ws.cell(cur, 6, ''), C['navy'], C['fwhite'])
+            totale_row = cur
+
+        elif t == 'esclusioni':
+            ws.row_dimensions[cur].height = 12
+            _sint_fill_row(ws, cur, C['navy'], C['fwhite'], sz=9)
+            ws.merge_cells(f'A{cur}:F{cur}')
+            style(ws.cell(cur, 1, f'  {row_data.get("label","")}'),
+                  C['navy'], C['fwhite'], sz=9)
+
+        elif t == 'riga_vuota':
+            ws.row_dimensions[cur].height = 5
+            _sint_fill_row(ws, cur, C['white'], C['white'])
+
+        cur += 1
+
+    for r in range(cur, cur + 300):
+        ws.row_dimensions[r].hidden = True
+
+    return wb
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Usage: python3 genera_computo.py input.json [output.xlsx]")
