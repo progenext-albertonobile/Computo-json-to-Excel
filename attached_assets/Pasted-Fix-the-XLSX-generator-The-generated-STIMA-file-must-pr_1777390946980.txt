@@ -1,0 +1,45 @@
+Fix the XLSX generator. The generated STIMA file must preserve the EcoShopper template header exactly.
+
+Current bug:
+The output does not match the template:
+- Progenext logo row is missing
+- generated content starts too high
+- row 5 coefficient note is missing/overwritten
+- first section starts at row 5 instead of row 6
+- sheet/tab/view are different from the template
+- header is being recreated by code instead of copied from the template
+
+Required behavior:
+Use the EcoShopper XLSX template as the source of truth.
+
+Do NOT create the workbook from scratch.
+Do NOT manually rebuild rows 1-5.
+Do NOT hard-code header formatting in Python.
+Do NOT change logo, merged cells, row heights, column widths, fills, fonts, borders, zoom, sheet tab, print settings, or page setup.
+
+Implementation rules:
+1. Load the template with openpyxl using load_workbook(template_path).
+2. Use the existing sheet from the template, preferably `SC_C_FULL`.
+3. Preserve rows 1:5 exactly.
+4. Only write dynamic metadata into the existing intended cells, keeping their styles unchanged.
+5. Generated computo rows must start at row 6.
+6. The first section row must be inserted/cloned from the template row style, not manually styled.
+7. Keep row 4 column headers exactly as in the template:
+   - Articolo / Descrizione
+   - Marca / Rif.
+   - Specifiche tecniche e note
+   - q.ta
+   - PREZZO UNITARIO
+   - PREZZO TOTALE
+   - STIMA
+   - Nota
+8. Keep row 5 coefficient note exactly as template.
+9. Preserve the Progenext logo/image anchored in row 1.
+10. Preserve zoom at 100%, not 10%.
+11. Preserve columns A:H as the formatted area; do not extend custom formatting randomly to extra columns.
+12. Do not rename the worksheet unless explicitly configured.
+
+Acceptance test:
+Open the generated XLSX and compare rows 1:5 with the EcoShopper template.
+They must be visually identical except for allowed dynamic text values in title/date/scenario cells.
+The first generated section must begin at row 6, exactly like the EcoShopper template.

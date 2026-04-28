@@ -21,11 +21,16 @@ Tipi riga supportati:
   riga_vuota        — riga vuota di separazione (altezza 6pt)
 """
 import json, sys
+from copy import copy
+from pathlib import Path
 
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook.defined_name import DefinedName
+
+# Template path for STIMA (cliente) — fonte autoritativa di stile/header/logo
+SINT_TEMPLATE_PATH = Path(__file__).resolve().parent / 'templates' / 'stima_template.xlsx'
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
 C = {
@@ -431,45 +436,52 @@ def _calc_prezzo(row):
     O = H + J + L + N
     return round(O * (1 + impr), 2)
 
-def _sint_header(ws, meta):
-    # Row 1 — banner spazio logo
-    ws.row_dimensions[1].height = 44
-    _sint_fill_row(ws, 1, C['white'], C['fnavy'], sz=10)
-    ws.merge_cells('A1:H1')
+SINT_HEADER_ROWS = 5            # le prime 5 righe del template (logo, banner, scenario, header colonne, nota coefficienti) sono intoccabili
+SINT_CONTENT_START = 6          # i contenuti generati partono da riga 6, esattamente come nel template
 
-    # Row 2 — navy: cliente | indirizzo + note_header + data
-    ws.row_dimensions[2].height = 22
-    _sint_fill_row(ws, 2, C['navy'], C['fwhite'], sz=10)
-    ws.merge_cells('A2:D2')
-    style(ws.cell(2, 1,
-          f'  STIMA PRELIMINARE — {meta.get("cliente","")}  |  {meta.get("indirizzo","")}'),
-          C['navy'], C['fwhite'], sz=10, h='left')
-    ws.merge_cells('E2:G2')
-    style(ws.cell(2, 5, meta.get('note_header', '')),
-          C['navy'], C['fwhite'], sz=8, h='center')
-    style(ws.cell(2, 8, meta.get('data', '')),
-          C['navy'], C['fwhite'], sz=8, h='center')
+def _sint_update_meta(ws, meta):
+    """Aggiorna SOLO le celle dinamiche del template, preservandone gli stili.
 
-    # Row 3 — blue: titolo scenario
-    ws.row_dimensions[3].height = 18
-    _sint_fill_row(ws, 3, C['blue'], C['fwhite'], sz=10)
-    ws.merge_cells('A3:H3')
-    style(ws.cell(3, 1, f'  {meta.get("titolo","")}'),
-          C['blue'], C['fwhite'], sz=10, h='left')
+    A2 = "STIMA PRELIMINARE — {cliente} | {indirizzo}"
+    H2 = data
+    A3 = titolo scenario
+    Eventuali sottotitoli/altre celle del template restano invariate.
+    """
+    cliente   = (meta.get('cliente')   or '').strip()
+    indirizzo = (meta.get('indirizzo') or '').strip()
+    data_str  = (meta.get('data')      or '').strip()
+    titolo    = (meta.get('titolo')    or '').strip()
 
-    # Row 4 — column headers
-    ws.row_dimensions[4].height = 34
-    hdrs = [
-        'Articolo / Descrizione', 'Marca / Rif.',
-        'Specifiche tecniche e note', 'q.ta',
-        'PREZZO UNITARIO\n€', 'PREZZO TOTALE\n€', 'STIMA\n€',
-        'Nota',
-    ]
-    for i, h in enumerate(hdrs, 1):
-        c = ws.cell(4, i, h)
-        style(c, C['lbhdr'], C['fwhite'], sz=7.5, h='center')
-        if i in (5, 6, 7):
-            c.number_format = SINT_EUR
+    if cliente or indirizzo:
+        sep = '  |  ' if (cliente and indirizzo) else ''
+        ws.cell(2, 1).value = f'  STIMA PRELIMINARE — {cliente}{sep}{indirizzo}'
+    if data_str:
+        ws.cell(2, 8).value = data_str
+    if titolo:
+        ws.cell(3, 1).value = f'  {titolo}'
+
+def _sint_clear_below(ws, start_row):
+    """Svuota le righe dal template (>= start_row): valori, merges, altezze.
+
+    Lascia intatti formati riga 1..start_row-1 (header, logo, nota coefficienti).
+    Non riduce max_col oltre SINT_NCOLS perché le colonne A:H sono l'area formattata.
+    """
+    # 1. Sciogli le merge dentro l'area da pulire
+    to_unmerge = [str(mc) for mc in list(ws.merged_cells.ranges)
+                  if mc.min_row >= start_row]
+    for ref in to_unmerge:
+        ws.unmerge_cells(ref)
+
+    # 2. Resetta valori delle celle (lo stile sarà sovrascritto dal renderer)
+    last_row = max(ws.max_row, start_row)
+    for r in range(start_row, last_row + 1):
+        for c in range(1, SINT_NCOLS + 1):
+            cell = ws.cell(r, c)
+            cell.value = None
+        # Ripristina altezza riga di default (verrà ri-impostata dal renderer)
+        if r in ws.row_dimensions:
+            ws.row_dimensions[r].height = None
+            ws.row_dimensions[r].hidden = False
 
 def _sint_voce_row(ws, cur, row_data, bg, prezzo_totale, height=36):
     """Riga voce per il template STIMA — 8 colonne, E/F/G valuta."""
@@ -499,25 +511,39 @@ def _sint_voce_row(ws, cur, row_data, bg, prezzo_totale, height=36):
             cell.number_format = SINT_EUR
 
 def build_sintesi(data):
-    """Output cliente: 8 colonne template EcoShopper, catena analitica nascosta."""
+    """Output cliente: usa il template EcoShopper come fonte autoritativa.
+
+    Le righe 1-5 (logo Progenext, banner navy, scenario, header colonne,
+    nota coefficienti) sono caricate dal template e MAI ricostruite via codice.
+    Vengono aggiornate solo le celle dinamiche (cliente/indirizzo, data,
+    titolo scenario). Il contenuto generato parte da riga 6.
+
+    Sono preservati senza modifiche: zoom, sheet name, larghezze colonne,
+    altezze righe header, fills/fonts/borders, eventuali immagini ancorate
+    (logo), freeze panes, page setup.
+    """
     meta = data.get('metadata', {})
     rows = data.get('rows', [])
 
-    wb = Workbook()
-    ws = wb.active
-    ws.title = 'STIMA'
-    ws.sheet_view.showGridLines = False
-    ws.freeze_panes = 'A5'
+    # 1. Carica il template (fonte autoritativa)
+    if not SINT_TEMPLATE_PATH.exists():
+        raise FileNotFoundError(
+            f"Template STIMA non trovato: {SINT_TEMPLATE_PATH}. "
+            "Assicurarsi che playbook_industrial/templates/stima_template.xlsx esista."
+        )
+    wb = load_workbook(SINT_TEMPLATE_PATH)
+    ws = wb['SC_C_FULL'] if 'SC_C_FULL' in wb.sheetnames else wb.active
 
-    for col, w in SINT_COLS.items():
-        ws.column_dimensions[get_column_letter(col)].width = w
+    # 2. Aggiorna SOLO le celle dinamiche del template
+    _sint_update_meta(ws, meta)
 
-    _sint_header(ws, meta)
+    # 3. Pulisci righe 6+ (valori, merge, altezze) — header e logo restano
+    _sint_clear_below(ws, SINT_CONTENT_START)
 
-    cur = 5
+    cur = SINT_CONTENT_START
     alt = 0
     subtot_rows = []
-    sec_start = 5
+    sec_start = cur
     totale_row = None
 
     VOCE_TYPES = {'voce', 'voce_highlight', 'voce_demolizione',
@@ -610,9 +636,9 @@ def build_sintesi(data):
 
         cur += 1
 
-    for r in range(cur, cur + 300):
-        ws.row_dimensions[r].hidden = True
-
+    # Le righe oltre il contenuto restano vuote/visibili — il template ha già
+    # le sue impostazioni di pagina. Non nascondiamo righe per non interferire
+    # col layout del template.
     return wb
 
 if __name__ == '__main__':
