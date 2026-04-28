@@ -113,7 +113,7 @@
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: .75rem 1rem;
+      padding: .85rem 1rem;
       margin-top: 1rem;
       font-size: .8125rem;
       color: #374151;
@@ -121,7 +121,75 @@
     }
     .meta.visible { display: block; }
     .meta strong { color: #111827; }
-    .meta dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem .75rem; }
+    .meta dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem .75rem; }
+    .meta + .meta { margin-top: .6rem; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .5rem;
+      margin: .75rem 0;
+    }
+    .stat {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: .55rem .65rem;
+      text-align: center;
+    }
+    .stat .v { font-size: 1.05rem; font-weight: 700; color: #1a3a5c; line-height: 1.2; }
+    .stat .l { font-size: .68rem; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; margin-top: .15rem; }
+
+    .chapter-list { margin-top: .25rem; }
+    .chapter-row {
+      display: flex;
+      justify-content: space-between;
+      gap: .5rem;
+      padding: .35rem .5rem;
+      border-bottom: 1px solid #eef0f3;
+      font-size: .8125rem;
+    }
+    .chapter-row:last-child { border-bottom: none; }
+    .chapter-row .name { color: #111827; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chapter-row .count { color: #6b7280; font-size: .75rem; flex-shrink: 0; }
+    .chapter-row .amt { color: #1a3a5c; font-weight: 600; flex-shrink: 0; min-width: 90px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .55rem .5rem;
+      margin-top: .5rem;
+      background: #1a3a5c;
+      color: #fff;
+      border-radius: 6px;
+      font-size: .9rem;
+      font-weight: 700;
+    }
+    .total-row .amt { font-variant-numeric: tabular-nums; }
+
+    .excl-row {
+      display: flex;
+      justify-content: space-between;
+      gap: .5rem;
+      padding: .35rem .5rem;
+      margin-top: .35rem;
+      background: #fef3e7;
+      border: 1px solid #fcd9b6;
+      border-radius: 6px;
+      font-size: .78rem;
+      color: #7c4a16;
+    }
+    .excl-row .amt { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    h3.section-title {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #6b7280;
+      margin: .85rem 0 .35rem;
+      font-weight: 600;
+    }
 
     .spinner {
       display: inline-block;
@@ -150,9 +218,18 @@
 
   <div class="meta" id="metaBox">
     <dl id="metaList"></dl>
-    <div style="margin-top:.5rem; color:#6b7280;">
-      <strong id="rowCount">0</strong> righe rilevate
+
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <h3 class="section-title">Capitoli</h3>
+    <div class="chapter-list" id="chapterList"></div>
+
+    <div class="total-row" id="totalRow" style="display:none;">
+      <span>TOTALE STIMATO — IVA esclusa</span>
+      <span class="amt" id="totalAmt"></span>
     </div>
+
+    <div id="exclusionsBox"></div>
   </div>
 
   <div style="display:flex; gap:.75rem; margin-top:1rem;">
@@ -198,6 +275,79 @@
 
   setupDropZone($('jsonZone'), $('jsonInput'), $('jsonName'));
 
+  // ── Calcolo prezzo cliente (replica esatta di _calc_prezzo in Python) ──
+  function calcPrezzo(row) {
+    const qty  = row.qty ?? 1;
+    const pu   = row.pu ?? 0;
+    const sc   = row.sc ?? 0;
+    const oa   = row.op_acc ?? 0;
+    const inst = row.inst ?? 0;
+    const ric  = row.ric ?? 0;
+    const impr = row.impr ?? 0;
+    const F = qty * pu;
+    const H = F * (1 - sc);
+    const J = H * oa;
+    const L = (H + J) * inst;
+    const N = (H + J + L) * ric;
+    const O = H + J + L + N;
+    return Math.round(O * (1 + impr) * 100) / 100;
+  }
+
+  function rowAmount(row) {
+    if (row.type === 'voce_lumpsum') return Number(row.total ?? 0);
+    if (['voce', 'voce_highlight', 'voce_demolizione', 'voce_trasporto', 'voce_esterna']
+        .includes(row.type)) {
+      return calcPrezzo(row);
+    }
+    return 0;
+  }
+
+  function fmtEur(n) {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency', currency: 'EUR', maximumFractionDigits: 0
+    }).format(n);
+  }
+
+  function analyze(rows) {
+    const counts = {};
+    const chapters = [];   // [{label, voci, amount}]
+    const exclusions = []; // [{desc, amount}]
+    let inExclusions = false;
+    let cur = null;        // current chapter
+    let totVoci = 0;
+
+    for (const r of rows) {
+      const t = r.type;
+      counts[t] = (counts[t] || 0) + 1;
+
+      if (t === 'esclusioni') {
+        inExclusions = true;
+        if (cur) { chapters.push(cur); cur = null; }
+        continue;
+      }
+      if (t === 'sezione') {
+        if (cur) chapters.push(cur);
+        cur = { label: r.label || '(sezione)', voci: 0, amount: 0 };
+        inExclusions = false;
+        continue;
+      }
+      if (inExclusions && t === 'voce_esterna') {
+        exclusions.push({ desc: r.desc || '(voce esterna)', amount: calcPrezzo(r) });
+        continue;
+      }
+      if (['voce', 'voce_highlight', 'voce_demolizione', 'voce_trasporto',
+           'voce_lumpsum'].includes(t)) {
+        const amt = rowAmount(r);
+        if (cur) { cur.voci += 1; cur.amount += amt; }
+        totVoci += 1;
+      }
+    }
+    if (cur) chapters.push(cur);
+
+    const total = chapters.reduce((s, c) => s + c.amount, 0);
+    return { counts, chapters, exclusions, totVoci, total };
+  }
+
   async function previewMeta(file) {
     $('metaBox').classList.remove('visible');
     $('downloadArea').innerHTML = '';
@@ -207,6 +357,8 @@
       const data = JSON.parse(text);
       const meta = data.metadata || {};
       const rows = Array.isArray(data.rows) ? data.rows : [];
+
+      // Metadata table
       const list = $('metaList');
       list.innerHTML = '';
       const fields = [
@@ -225,7 +377,66 @@
           list.appendChild(dd);
         }
       });
-      $('rowCount').textContent = rows.length;
+
+      // Analysis
+      const { chapters, exclusions, totVoci, total } = analyze(rows);
+
+      // Stats
+      const grid = $('statsGrid');
+      grid.innerHTML = '';
+      const stats = [
+        [chapters.length, 'Capitoli'],
+        [totVoci, 'Voci'],
+        [rows.length, 'Righe JSON'],
+      ];
+      stats.forEach(([v, l]) => {
+        const d = document.createElement('div');
+        d.className = 'stat';
+        d.innerHTML = `<div class="v">${v}</div><div class="l">${l}</div>`;
+        grid.appendChild(d);
+      });
+
+      // Chapter list
+      const chList = $('chapterList');
+      chList.innerHTML = '';
+      if (chapters.length === 0) {
+        chList.innerHTML = '<div style="color:#9ca3af; font-size:.78rem; padding:.4rem .5rem;">Nessun capitolo (sezione) trovato</div>';
+      } else {
+        chapters.forEach((c, i) => {
+          const row = document.createElement('div');
+          row.className = 'chapter-row';
+          row.innerHTML = `
+            <span class="name" title="${c.label.replace(/"/g,'&quot;')}">${i+1}. ${c.label}</span>
+            <span class="count">${c.voci} voci</span>
+            <span class="amt">${fmtEur(c.amount)}</span>`;
+          chList.appendChild(row);
+        });
+      }
+
+      // Total
+      if (total > 0) {
+        $('totalRow').style.display = 'flex';
+        $('totalAmt').textContent = fmtEur(total);
+      } else {
+        $('totalRow').style.display = 'none';
+      }
+
+      // Exclusions
+      const exBox = $('exclusionsBox');
+      exBox.innerHTML = '';
+      if (exclusions.length) {
+        const head = document.createElement('h3');
+        head.className = 'section-title';
+        head.textContent = `Esclusioni (${exclusions.length})`;
+        exBox.appendChild(head);
+        exclusions.forEach(e => {
+          const r = document.createElement('div');
+          r.className = 'excl-row';
+          r.innerHTML = `<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${e.desc.replace(/"/g,'&quot;')}">${e.desc}</span><span class="amt">${fmtEur(e.amount)}</span>`;
+          exBox.appendChild(r);
+        });
+      }
+
       $('metaBox').classList.add('visible');
     } catch (e) {
       showStatus('JSON non valido: ' + e.message, 'error');
